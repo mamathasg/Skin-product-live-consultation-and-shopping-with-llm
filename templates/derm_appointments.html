@@ -141,6 +141,25 @@
             background: #ffebee;
         }
 
+        /* === Notes modal (popup) styles === */
+        #notesModalOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #notesModal {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 18px 20px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
         @media (max-width: 768px) {
             .page-container {
                 margin: 20px auto;
@@ -232,8 +251,13 @@
                                 {% elif not c.is_completed %}
                                     <button type="button" class="btn-disabled" disabled>Not Available</button>
                                 {% else %}
-                                    <!-- If you have a summary page, replace '#' with its URL -->
-                                    <button type="button" class="btn-summary">View Summary</button>
+                                    <!-- View Summary now opens notes popup -->
+                                    <button type="button"
+                                            class="btn-summary btn-open-notes"
+                                            data-consult-id="{{ c.consult_id }}"
+                                            data-notes="{{ (c.der_notes or '')|e }}">
+                                        View Summary
+                                    </button>
                                 {% endif %}
                             </td>
                         </tr>
@@ -248,11 +272,41 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Notes Modal (popup) -->
+        <div id="notesModalOverlay">
+            <div id="notesModal">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3 style="margin:0; font-size:1.05rem;">Consultation Notes</h3>
+                    <button type="button" id="closeNotesModalBtn"
+                            style="border:none; background:transparent; font-size:1.2rem; cursor:pointer;">
+                        &times;
+                    </button>
+                </div>
+
+                <textarea id="notesTextarea"
+                          rows="6"
+                          style="width:100%; padding:8px 10px; border-radius:8px; border:1px solid #cfd8dc; font-size:0.9rem;"></textarea>
+
+                <div style="margin-top:14px; display:flex; justify-content:flex-end; gap:8px;">
+                    <button type="button" id="cancelNotesBtn"
+                            style="border-radius:999px; padding:6px 16px; font-size:0.85rem; border:1px solid #b0bec5; background:#fff; cursor:pointer;">
+                        Cancel
+                    </button>
+                    <button type="button" id="saveNotesBtn"
+                            style="border-radius:999px; padding:6px 18px; font-size:0.85rem; border:none; background:#1f7a5c; color:#fff; cursor:pointer;">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </main>
 
-    <!-- Simple filtering JS -->
+    <!-- JS: filter logic + notes popup -->
     <script>
     document.addEventListener('DOMContentLoaded', function () {
+        /* ==== Existing filter logic (unchanged) ==== */
         const buttons = document.querySelectorAll('.filter-btn');
         const rows = document.querySelectorAll('.consult-row');
 
@@ -286,6 +340,77 @@
 
         // default view
         applyFilter('all');
+
+        /* ==== New: Notes popup logic ==== */
+        let currentConsultId = null;
+
+        const notesModalOverlay = document.getElementById('notesModalOverlay');
+        const notesTextarea     = document.getElementById('notesTextarea');
+        const saveNotesBtn      = document.getElementById('saveNotesBtn');
+        const cancelNotesBtn    = document.getElementById('cancelNotesBtn');
+        const closeNotesModalBtn= document.getElementById('closeNotesModalBtn');
+
+        function openNotesModal(consultId, notes) {
+            currentConsultId = consultId;
+            notesTextarea.value = notes || '';
+            notesModalOverlay.style.display = 'flex';
+        }
+
+        function closeNotesModal() {
+            notesModalOverlay.style.display = 'none';
+            currentConsultId = null;
+        }
+
+        document.querySelectorAll('.btn-open-notes').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const consultId = btn.dataset.consultId;
+                const notes = btn.dataset.notes || '';
+                openNotesModal(consultId, notes);
+            });
+        });
+
+        cancelNotesBtn.addEventListener('click', closeNotesModal);
+        closeNotesModalBtn.addEventListener('click', closeNotesModal);
+        notesModalOverlay.addEventListener('click', (e) => {
+            if (e.target === notesModalOverlay) {
+                closeNotesModal();
+            }
+        });
+
+        // Save notes using fetch; backend should handle /derm/consult/<id>/notes
+        saveNotesBtn.addEventListener('click', function () {
+            if (!currentConsultId) return;
+
+            const newNotes = notesTextarea.value;
+
+            fetch(`/derm/consult/${currentConsultId}/notes`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                    // add CSRF header here if you use CSRF protection
+                },
+                body: JSON.stringify({ der_notes: newNotes })
+            })
+            .then(resp => resp.json())
+            .then(data => {
+                if (data.success) {
+                    // Update data-notes on the button so it shows latest text next time
+                    const btn = document.querySelector(
+                        `.btn-open-notes[data-consult-id="${currentConsultId}"]`
+                    );
+                    if (btn) {
+                        btn.dataset.notes = newNotes;
+                    }
+                    closeNotesModal();
+                } else {
+                    alert('Failed to save notes.');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error while saving notes.');
+            });
+        });
     });
     </script>
 </body>
