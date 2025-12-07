@@ -1018,6 +1018,34 @@ def derm_add_note(consult_id):
 
     return jsonify({"success": True, "msg": "Note saved successfully!"})
 
+@app.route("/derm/consult/<int:consult_id>/notes", methods=["POST"])
+def derm_update_notes(consult_id):
+    """
+    New endpoint used by the popup "View Summary" -> Save button.
+    Accepts JSON: { "der_notes": "some text" }
+    Updates derm_notes in the consultation table.
+    """
+    if "derm_id" not in session:
+        return jsonify({"success": False, "msg": "Unauthorized"}), 403
+
+    data = request.get_json() or {}
+    note = (data.get("der_notes") or "").strip()
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        UPDATE consultation
+        SET derm_notes = %s
+        WHERE consult_id = %s AND dermatologist_id = %s
+        """,
+        (note, consult_id, session["derm_id"]),
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({"success": True, "msg": "Note saved successfully!"})
 
 @app.route("/derm/slots", methods=["GET", "POST"])
 def derm_slots():
