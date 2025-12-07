@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-8">
+      <h3 class="fw-bold mb-4">Review Your Order</h3>
+
+      {% for item in cart_items %}
+      <div class="card mb-3 shadow-sm border-0">
+        <div class="row g-3 align-items-center p-3">
+          <div class="col-3 text-center">
+            <img src="{{ item.image_url }}" class="img-fluid rounded" alt="{{ item.title }}">
+          </div>
+          <div class="col-9">
+            <h6 class="fw-semibold">{{ item.title }}</h6>
+            <p class="small text-muted">{{ item.brand }} | {{ item.category }}</p>
+            <p class="text-success small mb-0">In Stock</p>
+            <p class="fw-bold mt-1">${{ item.price }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+      <div class="card p-4 shadow-sm mt-3">
+        <form method="POST">
+          <h5 class="fw-bold mb-3">Shipping Address</h5>
+          <div class="row mb-2">
+            <div class="col-md-6 mb-2">
+              <input type="text" name="full_name" class="form-control" placeholder="Full Name" required>
+            </div>
+            <div class="col-md-6 mb-2">
+              <input type="text" name="street" class="form-control" placeholder="Street Address" required>
+            </div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-md-4 mb-2">
+              <input type="text" name="city" class="form-control" placeholder="City" required>
+            </div>
+            <div class="col-md-4 mb-2">
+              <input type="text" name="state" class="form-control" placeholder="State" required>
+            </div>
+            <div class="col-md-4 mb-2">
+              <input type="text" name="zip" class="form-control" placeholder="ZIP Code" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <input type="text" name="country" class="form-control" placeholder="Country" required>
+          </div>
+
+          <h5 class="fw-bold mb-3">Payment Method</h5>
+          <select name="payment_method" class="form-select mb-3" required>
+            <option value="">-- Select Payment Method --</option>
+            <option value="Credit Card">Credit Card</option>
+            <option value="Debit Card">Debit Card</option>
+            <option value="PayPal">PayPal</option>
+            <option value="UPI">UPI</option>
+          </select>
+
+          <button type="submit" class="btn btn-warning w-100 fw-bold py-2">
+            Place Your Order
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm position-sticky top-0">
+        <h5 class="fw-bold mb-3">Order Summary</h5>
+        <ul class="list-group mb-3">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Items Subtotal <span>${{ "%.2f"|format(subtotal) }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Shipping & Handling <span>${{ "%.2f"|format(shipping) }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Discount <span class="text-success">-${{ "%.2f"|format(discount) }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Estimated Tax <span>${{ "%.2f"|format(tax) }}</span>
+          </li>
+        </ul>
+
+        <h5 class="fw-bold text-end">Order Total: ${{ "%.2f"|format(total) }}</h5>
+        <p class="text-muted small mt-2 text-center">Secure transaction • Easy returns</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <div class="card p-4 shadow-lg border-0">
+    <div class="row">
+      <!-- Product Image -->
+      <div class="col-md-4 text-center">
+        <img src="{{ product.image_url }}" alt="{{ product.title }}" class="img-fluid rounded shadow-sm" style="max-height: 300px; object-fit: contain;">
+      </div>
+
+      <!-- Product Info -->
+      <div class="col-md-8">
+        <h3 class="text-primary fw-bold mb-3">{{ product.title }}</h3>
+        <p><strong>Category:</strong> {{ product.category }}</p>
+        <p><strong>Brand:</strong> {{ product.brand }}</p>
+        <p><strong>Skin Type:</strong> {{ product.skin_type }}</p>
+        <p><strong>Number of Items:</strong> {{ product.number_of_items }}</p>
+        <p><strong>Sold By:</strong> {{ product.sold_by }}</p>
+        <p><strong>Item Weight:</strong> {{ product.item_weight }}</p>
+        <p><strong>Product Dimensions:</strong> {{ product.product_dimensions }}</p>
+        <p><strong>Ingredients:</strong> {{ product.ingredients }}</p>
+        <p><strong>Safety Info:</strong> {{ product.safety_information }}</p>
+        <p><strong>Customer Reviews:</strong> {{ product.customer_reviews }}</p>
+
+        <h4 class="text-success mt-3 fw-bold">💲Price: ${{ product.price }}</h4>
+
+        <!-- Only Add to Cart button -->
+        <div class="mt-4 text-start">
+          <a href="{{ url_for('add_to_cart', prod_id=product.prod_id) }}" 
+             class="btn btn-lg btn-primary px-5 shadow-sm" id="addToCartBtn">
+            🛒 Add to Cart
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mini Cart Sidebar -->
+<div id="miniCart" class="mini-cart shadow-lg">
+  <div class="mini-cart-header d-flex justify-content-between align-items-center">
+    <h6 class="m-0">Your Cart</h6>
+    <button id="closeCart" class="btn btn-sm btn-outline-danger">✕</button>
+  </div>
+
+  <div id="miniCartItems" class="mini-cart-body p-3 text-center text-muted">
+    Cart is empty
+  </div>
+
+  <div class="mini-cart-footer p-3">
+    <a href="/cart" class="btn btn-primary w-100">View Full Cart</a>
+  </div>
+</div>
+
+<!-- JS for Mini Cart -->
+<script>
+const addBtn = document.getElementById('addToCartBtn');
+const miniCart = document.getElementById('miniCart');
+const miniCartItems = document.getElementById('miniCartItems');
+const closeCart = document.getElementById('closeCart');
+
+async function refreshCart() {
+  try {
+    const res = await fetch('/cart_items');
+    if (!res.ok) return;
+    const items = await res.json();
+
+    miniCartItems.innerHTML = "";
+    if (!items.length) {
+      miniCartItems.innerHTML = "<p class='text-muted mt-3'>Cart is empty</p>";
+    } else {
+      items.forEach(i => {
+        const div = document.createElement('div');
+        div.classList.add('cart-item', 'border-bottom', 'py-2', 'd-flex', 'align-items-center');
+        div.innerHTML = `
+          <img src="${i.image_url}" alt="${i.title}" width="50" height="50" class="rounded me-2">
+          <div class="text-start">
+            <small class="fw-bold">${i.title.substring(0, 40)}...</small><br>
+            <span class="text-success">$${i.price}</span>
+          </div>
+        `;
+        miniCartItems.appendChild(div);
+      });
+    }
+
+    miniCart.style.right = "0"; // Slide open
+  } catch (error) {
+    console.error("Error refreshing cart:", error);
+  }
+}
+
+if (addBtn) {
+  addBtn.addEventListener('click', e => {
+    // Delay refresh so it updates after redirect
+    setTimeout(refreshCart, 800);
+  });
+}
+
+if (closeCart) {
+  closeCart.addEventListener('click', () => {
+    miniCart.style.right = "-400px";
+  });
+}
+</script>
+{% endblock %}

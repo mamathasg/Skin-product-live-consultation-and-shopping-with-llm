@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-lg p-4 border-0">
+      <h3 class="text-center text-success mb-3 fw-bold">Book a Dermatologist Consultation</h3>
+      <p class="text-center text-muted">Fee: <strong class="text-success">$20</strong></p>
+
+      <form method="POST" id="consultForm">
+        <!-- Dermatologist Selection -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Select Dermatologist</label>
+          <select id="dermatologistSelect" name="dermatologist_id" class="form-select" required>
+            <option value="">-- Choose a Dermatologist --</option>
+            {% for d in dermatologists %}
+              <option value="{{ d.dermatologist_id }}">{{ d.dermatologist_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Date Picker -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Select Date</label>
+          <input type="text" id="consultDate" name="consult_date" class="form-control"
+                 placeholder="DD-MM-YYYY" autocomplete="off" required>
+        </div>
+
+        <!-- Time Slot -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Select Available Time</label>
+          <select name="consult_time" id="timeSlot" class="form-select" required disabled>
+            <option value="">-- Select Date First --</option>
+          </select>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Payment Method</label>
+          <select name="pay_method" class="form-select" required>
+            <option value="Credit Card">Credit Card</option>
+            <option value="Debit Card">Debit Card</option>
+            <option value="PayPal">PayPal</option>
+            <option value="UPI">UPI</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">
+          Pay $20 & Book Consultation
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% if previous_consults %}
+<div class="container mt-5">
+  <h4 class="text-center text-success mb-3">Your Upcoming & Past Consultations</h4>
+
+  <!-- FILTER PILLS -->
+  <div class="d-flex justify-content-center mb-3 gap-2">
+    <button type="button"
+            class="btn btn-outline-success btn-sm filter-btn active"
+            data-filter="all">
+      All
+    </button>
+    <button type="button"
+            class="btn btn-outline-success btn-sm filter-btn"
+            data-filter="upcoming">
+      Upcoming
+    </button>
+    <button type="button"
+            class="btn btn-outline-success btn-sm filter-btn"
+            data-filter="live">
+      Live now
+    </button>
+    <button type="button"
+            class="btn btn-outline-success btn-sm filter-btn"
+            data-filter="past">
+      Past
+    </button>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle text-center">
+      <thead class="table-success">
+        <tr>
+          <th>Dermatologist</th>
+          <th>Date</th>
+          <th>Time Slot</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="consultTableBody">
+        {% for c in previous_consults %}
+        <tr data-status="{{ 'live' if c.can_join else ('upcoming' if c.is_future else 'past') }}">
+          <td>{{ c.dermatologist_name }}</td>
+          <td>{{ c.consult_date.strftime('%d-%m-%Y') }}</td>
+          <td>{{ c.consult_date.strftime('%H:%M') }}</td>
+          <td>
+            {% if c.payment_status == 'Paid' %}
+              <span class="badge bg-success">Paid</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">Pending</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if c.payment_status == 'Paid' %}
+              {% if c.is_future %}
+                <button class="btn btn-outline-secondary btn-sm" disabled>Not Yet Available</button>
+              {% elif c.is_expired %}
+                <button class="btn btn-outline-danger btn-sm" disabled>Expired</button>
+              {% elif c.can_join %}
+                <a href="{{ url_for('live_consultation', consult_id=c.consult_id) }}"
+                   class="btn btn-outline-success btn-sm">
+                  Join Live Session
+                </a>
+              {% else %}
+                <button class="btn btn-outline-secondary btn-sm" disabled>Not Available</button>
+              {% endif %}
+            {% else %}
+              <button class="btn btn-outline-secondary btn-sm" disabled>Not Available</button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const dateInput = document.getElementById("consultDate");
+  const slotSelect = document.getElementById("timeSlot");
+  const dermSelect = document.getElementById("dermatologistSelect");
+
+  // --- date setup ---
+  const today = new Date();
+  const minDate = today.toISOString().split("T")[0];
+  const max = new Date(today);
+  max.setDate(today.getDate() + 14);
+  const maxDate = max.toISOString().split("T")[0];
+
+  dateInput.addEventListener("focus", () => {
+    dateInput.type = "date";
+    dateInput.min = minDate;
+    dateInput.max = maxDate;
+  });
+
+  dateInput.addEventListener("blur", () => {
+    if (dateInput.value) {
+      const [y, m, d] = dateInput.value.split("-");
+      dateInput.type = "text";
+      dateInput.value = `${d}-${m}-${y}`;
+    } else {
+      dateInput.type = "text";
+    }
+  });
+
+  dateInput.addEventListener("change", loadSlots);
+  dermSelect.addEventListener("change", loadSlots);
+
+  async function loadSlots() {
+    const dermId = dermSelect.value;
+    let date = dateInput.value;
+
+    // Convert dd-mm-yyyy → yyyy-mm-dd
+    if (date.includes("-") && date.split("-")[0].length === 2) {
+      const [d, m, y] = date.split("-");
+      date = `${y}-${m}-${d}`;
+    }
+
+    slotSelect.innerHTML = `<option>Loading...</option>`;
+    slotSelect.disabled = true;
+
+    if (!dermId || !date) return;
+
+    try {
+      const res = await fetch(`/available_slots/${dermId}?date=${date}`);
+      const data = await res.json();
+
+      slotSelect.innerHTML = "";
+      if (data.length > 0) {
+        data.forEach(t => {
+          const o = document.createElement("option");
+          o.value = t;
+          o.textContent = t;
+          slotSelect.appendChild(o);
+        });
+        slotSelect.disabled = false;
+      } else {
+        slotSelect.innerHTML = `<option>No slots available</option>`;
+        slotSelect.disabled = true;
+      }
+    } catch (e) {
+      slotSelect.innerHTML = `<option>Error loading slots</option>`;
+      slotSelect.disabled = true;
+    }
+  }
+
+  document.getElementById("consultForm").addEventListener("submit", () => {
+    if (dateInput.type === "text" && dateInput.value.includes("-")) {
+      const [d, m, y] = dateInput.value.split("-");
+      dateInput.value = `${y}-${m}-${d}`;
+    }
+  });
+
+  // --------- FILTER LOGIC FOR CONSULTATION TABLE ----------
+  const filterButtons = document.querySelectorAll(".filter-btn");
+  const rows = document.querySelectorAll("#consultTableBody tr");
+
+  filterButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const filter = btn.getAttribute("data-filter");
+
+      // highlight active button
+      filterButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      rows.forEach(row => {
+        const status = row.getAttribute("data-status"); // upcoming / live / past
+        if (filter === "all" || status === filter) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
+      });
+    });
+  });
+
+});
+</script>
+
+<style>
+  /* make active pill filled */
+  .filter-btn.active {
+    background-color: #1c7c54;
+    color: #fff;
+  }
+</style>
+
+{% endblock %}

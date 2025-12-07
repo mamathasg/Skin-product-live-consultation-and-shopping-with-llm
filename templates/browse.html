@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2 class="text-center fw-bold mb-4">Browse Products</h2>
+
+  <!-- 🔍 Filters Section -->
+  <form method="GET" class="row g-3 justify-content-center align-items-center mb-4">
+
+    <!-- Search -->
+    <div class="col-md-3">
+      <input type="text" name="search" class="form-control form-control-lg"
+             placeholder="Search by product name or brand" value="{{ search }}">
+    </div>
+
+    <!-- Product Type -->
+    <div class="col-md-2">
+      <select name="product_type" class="form-select form-select-lg">
+        <option value="All">All Types</option>
+        {% for pt in product_types %}
+        <option value="{{ pt }}" {% if selected_filters.product_type == pt %}selected{% endif %}>{{ pt }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Brand -->
+    <div class="col-md-2">
+      <select name="brand" class="form-select form-select-lg">
+        <option value="All">All Brands</option>
+        {% for b in brands %}
+        <option value="{{ b }}" {% if selected_filters.brand == b %}selected{% endif %}>{{ b }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Skin Type -->
+    <div class="col-md-2">
+      <select name="skin_type" class="form-select form-select-lg">
+        <option value="All">All Skin Types</option>
+        {% for st in skin_types %}
+        <option value="{{ st }}" {% if selected_filters.skin_type == st %}selected{% endif %}>{{ st }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-1">
+      <button type="submit" class="btn btn-primary btn-lg w-100">Filter</button>
+    </div>
+
+  </form>
+
+  <!-- 🛍 Product Cards -->
+  <div class="row mt-4">
+    {% if products %}
+      {% for product in products %}
+        <div class="col-md-3 mb-4">
+          <div class="card h-100 shadow-sm product-card">
+            <img src="{{ product.image_url or url_for('static', filename='images/default.png') }}" 
+                 class="card-img-top p-3" alt="{{ product.title }}">
+            <div class="card-body">
+              <h5 class="card-title fw-bold">{{ product.title }}</h5>
+              <p class="card-text text-muted mb-1"><b>Brand:</b> {{ product.brand }}</p>
+              <p class="card-text text-muted mb-1"><b>Type:</b> {{ product.product_type }}</p>
+              <p class="card-text text-success fw-semibold">${{ product.price }}</p>
+              <a href="{{ url_for('product_detail', prod_id=product.prod_id) }}" 
+                 class="btn btn-outline-primary w-100 mt-2">View Details</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-center mt-5">
+        <h5 class="text-muted">No products found. Try adjusting filters or searching by another term.</h5>
+      </div>
+    {% endif %}
+  </div>
+</div>
+<script>
+document.querySelectorAll('select').forEach(sel => {
+  sel.addEventListener('change', () => sel.form.submit());
+});
+</script>
+<script>
+const searchInput = document.querySelector('input[name="search"]');
+
+// Create a simple dropdown for suggestions
+const suggestionBox = document.createElement('ul');
+suggestionBox.classList.add('list-group', 'position-absolute', 'w-100', 'mt-1');
+suggestionBox.style.zIndex = "9999";
+searchInput.parentNode.appendChild(suggestionBox);
+
+searchInput.addEventListener('input', async () => {
+  const query = searchInput.value.trim();
+  suggestionBox.innerHTML = '';
+  if (query.length < 2) return; // Only trigger after 2+ characters
+
+  try {
+    const res = await fetch('/product_names');
+    const data = await res.json();
+
+    // Filter matches (case-insensitive)
+    const matches = data.filter(name => name.toLowerCase().includes(query.toLowerCase())).slice(0, 8);
+
+    matches.forEach(match => {
+      const li = document.createElement('li');
+      li.textContent = match;
+      li.classList.add('list-group-item', 'list-group-item-action');
+      li.style.cursor = 'pointer';
+      li.addEventListener('click', () => {
+        searchInput.value = match;
+        suggestionBox.innerHTML = '';
+        searchInput.form.submit(); // Auto search on click
+      });
+      suggestionBox.appendChild(li);
+    });
+  } catch (err) {
+    console.error("Autocomplete error:", err);
+  }
+});
+
+// Close dropdown on blur
+searchInput.addEventListener('blur', () => {
+  setTimeout(() => suggestionBox.innerHTML = '', 200);
+});
+</script>
+
+{% endblock %}

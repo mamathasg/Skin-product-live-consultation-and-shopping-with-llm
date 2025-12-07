@@ -1,0 +1,10 @@
+SQLAlchemy
+Flask
+gunicorn
+pymysql
+python-dotenv
+bcrypt
+itsdangerous
+requests
+Flask-Mail
+twilio

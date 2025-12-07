@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="card shadow-sm p-4 mx-auto" style="max-width: 600px;">
+  <h3 class="text-center text-success mb-4 fw-bold">🕒 Manage Available Time Slots</h3>
+
+  <form method="POST" id="slotsForm">
+    <div id="slotContainer">
+      {% if slots %}
+        {% for slot in slots.split(',') %}
+        <div class="d-flex align-items-center mb-2 slot-row">
+          <input type="time" name="slots[]" value="{{ slot.strip() }}" class="form-control me-2" required>
+          <button type="button" class="btn btn-outline-danger btn-sm remove-slot">✕</button>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="d-flex align-items-center mb-2 slot-row">
+          <input type="time" name="slots[]" class="form-control me-2" required>
+          <button type="button" class="btn btn-outline-danger btn-sm remove-slot">✕</button>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="text-center mt-3">
+      <button type="button" class="btn btn-outline-primary" id="addSlot">➕ Add Time Slot</button>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="text-center">
+      <button type="submit" class="btn btn-success px-4 py-2 fw-semibold">💾 Save Changes</button>
+    </div>
+  </form>
+
+  <div class="text-center mt-3">
+    <a href="{{ url_for('derm_dashboard') }}" class="text-decoration-none">&larr; Back to Dashboard</a>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.getElementById('slotContainer');
+  const addBtn = document.getElementById('addSlot');
+
+  // Add new slot row
+  addBtn.addEventListener('click', () => {
+    const div = document.createElement('div');
+    div.classList.add('d-flex', 'align-items-center', 'mb-2', 'slot-row');
+    div.innerHTML = `
+      <input type="time" name="slots[]" class="form-control me-2" required>
+      <button type="button" class="btn btn-outline-danger btn-sm remove-slot">✕</button>
+    `;
+    container.appendChild(div);
+  });
+
+  // Remove slot row
+  container.addEventListener('click', (e) => {
+    if (e.target.classList.contains('remove-slot')) {
+      e.target.closest('.slot-row').remove();
+    }
+  });
+
+  // On form submit, combine all time slots into a comma-separated string
+  document.getElementById('slotsForm').addEventListener('submit', (e) => {
+    const inputs = document.querySelectorAll('input[name="slots[]"]');
+    const combined = Array.from(inputs).map(i => i.value).filter(Boolean).join(',');
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = 'slots';
+    hidden.value = combined;
+    e.target.appendChild(hidden);
+  });
+});
+</script>
+
+{% endblock %}

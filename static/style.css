@@ -1,0 +1,374 @@
+/* 🌿 GlowCare – Soft Sage Green & Ivory Theme */
+
+/* ---------- Base ---------- */
+body {
+  background: linear-gradient(180deg, #fdfcf9 0%, #faf8f4 100%);
+  color: #3d463f;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+
+/* ---------- Navbar ---------- */
+.navbar {
+  background: #ffffff;
+  border-bottom: 1px solid #e7eae5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+.navbar-brand {
+  color: #2b5938 !important;
+  font-weight: 700;
+  font-size: 1.6rem;
+  letter-spacing: 0.5px;
+}
+.navbar-brand:hover {
+  color: #193a24 !important;
+}
+.navbar-nav .nav-link {
+  color: #5f6c61 !important;
+  font-weight: 500;
+  margin-right: 18px;
+  transition: all 0.3s ease;
+}
+.navbar-nav .nav-link:hover {
+  color: #2b5938 !important;
+}
+
+/* ---------- Buttons (Light Sage Version) ---------- */
+.btn-primary {
+  background: linear-gradient(90deg, #a8d5ba, #7fb693); /* lighter sage gradient */
+  border: none;
+  color: #1f3d2b; /* deep readable green text */
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+.btn-primary:hover {
+  background: linear-gradient(90deg, #7fb693, #619f80); /* slightly darker on hover */
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(61, 126, 87, 0.3);
+}
+
+.btn-outline-dark {
+  border-color: #7fb693;
+  color: #3d7e57;
+  border-radius: 8px;
+}
+.btn-outline-dark:hover {
+  background: #7fb693;
+  color: #ffffff;
+}
+
+/* For Add to Cart / Success Buttons */
+.btn-success {
+  background: linear-gradient(90deg, #a8d5ba, #7fb693);
+  border: none;
+  color: #1f3d2b;
+  font-weight: 600;
+  border-radius: 8px;
+}
+.btn-success:hover {
+  background: linear-gradient(90deg, #7fb693, #619f80);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(61, 126, 87, 0.3);
+}
+
+
+/* ---------- Hero Section ---------- */
+.sage-hero {
+  background: #e7efe8;
+  border-radius: 18px;
+  color: #2b5938;
+  padding: 6rem 1rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+}
+.sage-hero h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #193a24;
+}
+.sage-hero p {
+  color: #4b584e;
+  font-size: 1.15rem;
+}
+
+/* ---------- Section Blocks ---------- */
+.ready-to-grow-section,
+.self-care-section {
+  background: #e7efe8;
+  padding: 3rem 1rem;
+  border-radius: 16px;
+  text-align: center;
+  margin-top: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+.ready-to-grow-section h3,
+.self-care-section h2 {
+  color: #1f4c31;
+  font-weight: 700;
+}
+.ready-to-grow-section p,
+.self-care-section p {
+  color: #3f463f;
+  font-size: 1.1rem;
+}
+
+/* ---------- Cards ---------- */
+.card {
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f5f7f4 0%, #e9f0eb 100%); /* soft sage-ivory blend */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+  background: linear-gradient(180deg, #edf4ef 0%, #dce8e0 100%);
+}
+
+/* Product Images */
+.card img {
+  object-fit: contain;
+  height: 200px;
+  padding: 15px;
+}
+
+/* Product Title and Text */
+.card-body h5,
+.card-body p {
+  color: #2b5938;
+}
+
+/* Price styling */
+.price-tag {
+  color: #3d7e57 !important;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+/* View Details Button */
+.card .btn-outline-primary {
+  border-color: #7fb693;
+  color: #2b5938;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+.card .btn-outline-primary:hover {
+  background: #7fb693;
+  color: #fff;
+  box-shadow: 0 4px 8px rgba(61, 126, 87, 0.3);
+}
+
+
+/* ---------- Product Detail Styling ---------- */
+.product-title {
+  color: #1f4c31 !important;
+  font-weight: 700;
+}
+.text-primary,
+a.text-primary,
+a {
+  color: #2b5938 !important;
+}
+a:hover {
+  color: #1f4c31 !important;
+}
+.text-success,
+.price-tag {
+  color: #2b5938 !important;
+  font-weight: 600;
+}
+.btn-success {
+  background: linear-gradient(90deg, #3d7e57, #2b5938);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+}
+.btn-success:hover {
+  background: linear-gradient(90deg, #2b5938, #1f4c31);
+  box-shadow: 0 4px 10px rgba(43, 89, 56, 0.3);
+}
+
+/* ---------- Form Inputs ---------- */
+form select,
+form input {
+  border-radius: 8px;
+  border: 1px solid #d8e0da;
+  background: #ffffff;
+}
+form input:focus,
+form select:focus {
+  border-color: #3d7e57;
+  box-shadow: 0 0 6px rgba(61, 126, 87, 0.3);
+}
+
+/* ---------- Alerts ---------- */
+.alert {
+  background: #edf7f0;
+  border-left: 4px solid #3d7e57;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* ---------- Mini Cart ---------- */
+.mini-cart {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 320px;
+  height: 100%;
+  background: #ffffff;
+  box-shadow: -4px 0 14px rgba(0, 0, 0, 0.15);
+  transition: right 0.3s ease;
+  z-index: 3000;
+  border-left: 4px solid #3d7e57;
+}
+.mini-cart-header {
+  background: linear-gradient(90deg, #3d7e57, #2b5938);
+  color: white;
+  padding: 10px;
+}
+
+/* ---------- Footer (Soft Muted Sage) ---------- */
+footer {
+  background: linear-gradient(90deg, #3a5f4a, #2e4a39); /* softer and less saturated */
+  color: #f2f5f3;
+  text-align: center;
+  padding: 25px;
+  font-size: 0.9rem;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+footer a {
+  color: #d2e6da;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+footer a:hover {
+  color: #ffffff;
+}
+.img-fluid {
+  filter: contrast(1.1) brightness(1.1) saturate(1.1);
+}
+
+.card {
+  border-radius: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+/* Floating Button */
+.glowcare-chat-button {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 60px;
+    height: 60px;
+    background: #0c875a;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 26px;
+    cursor: pointer;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.25);
+    transition: 0.2s ease;
+    z-index: 9999;
+}
+.glowcare-chat-button:hover { transform: scale(1.12); }
+
+/* Chat Box */
+.glowcare-chat-box {
+    position: fixed;
+    bottom: 95px;
+    right: 25px;
+    width: 320px;
+    height: 450px;
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 9999;
+}
+
+/* Header */
+.chat-header {
+    background: #0c875a;
+    color: white;
+    padding: 12px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.close-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+/* Messages */
+.chat-messages {
+    padding: 12px;
+    overflow-y: auto;
+    background: #f6faf7;
+    flex: 1;
+}
+
+.chat-message-user {
+    text-align: right;
+    margin: 10px 0;
+}
+.chat-message-user span {
+    background: #0c875a;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 18px;
+    display: inline-block;
+}
+
+.chat-message-ai {
+    margin: 10px 0;
+}
+.chat-message-ai span {
+    background: #e5f6ee;
+    color: #0c5d3f;
+    padding: 8px 14px;
+    border-radius: 18px;
+    display: inline-block;
+}
+
+/* Input Bar */
+.chat-input-bar {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #e2e2e2;
+    background: white;
+}
+
+.chat-input-bar input {
+    flex: 1;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    background: #f2f2f2;
+}
+
+.send-btn {
+    width: 45px;
+    background: #0c875a;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    margin-left: 8px;
+    cursor: pointer;
+}

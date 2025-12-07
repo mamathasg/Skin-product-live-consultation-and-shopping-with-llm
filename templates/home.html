@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- 🌿 Hero Section -->
+<section class="hero-section d-flex align-items-center justify-content-center mt-4 sage-hero">
+  <div class="container py-5">
+    <div class="row align-items-center">
+      
+      <!-- Text Side -->
+      <div class="col-lg-6 text-center text-lg-start mb-4 mb-lg-0 animate__animated animate__fadeInLeft">
+        <h1 class="fw-bold mb-3 display-5">GlowCare — Your Skincare Destination ✨</h1>
+        <p class="lead mb-4">
+          Discover dermatologist-approved skincare, personalized consultations, and premium beauty essentials — 
+          all crafted to make you glow naturally.
+        </p>
+
+        <!-- 🔹 Dynamic Buttons -->
+        {% if session.user_id %}
+          <a href="{{ url_for('browse') }}" class="btn btn-success btn-lg fw-semibold px-4 py-2 shadow-sm me-2">
+            🛍️ Go to Shop
+          </a>
+          <a href="{{ url_for('consultation') }}" class="btn btn-outline-success btn-lg fw-semibold px-4 py-2 shadow-sm">
+            💬 Book Consultation
+          </a>
+        {% elif session.derm_id %}
+          <a href="{{ url_for('derm_dashboard') }}" class="btn btn-success btn-lg fw-semibold px-4 py-2 shadow-sm">
+            👨‍⚕️ Go to Dashboard
+          </a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg fw-semibold px-4 py-2 shadow-sm me-2">
+            Login
+          </a>
+          <a href="{{ url_for('signup') }}" class="btn btn-outline-primary btn-lg fw-semibold px-4 py-2 shadow-sm">
+            Sign Up
+          </a>
+        {% endif %}
+      </div>
+
+      <!-- Image Side -->
+      <div class="col-lg-6 text-center animate__animated animate__fadeInRight">
+        <img src="{{ url_for('static', filename='images/skincare_girl.png') }}" 
+             alt="Skincare Model" 
+             class="img-fluid rounded-4 shadow-lg hero-image"
+             style="max-height: 420px; object-fit: cover; border: 3px solid #fff;">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 🌸 Highlights Section -->
+<section class="mt-5 px-0" style="margin-left: 0; margin-right: 0;">
+  <div class="container-fluid px-0">
+    <div class="row justify-content-center g-0">
+      <div class="col-lg-4 col-md-6 px-0">
+        <div class="d-flex justify-content-center align-items-center">
+          <img src="{{ url_for('static', filename='images/ChatGPT Image Nov 3, 2025, 11_49_17 PM.png') }}" 
+               alt="Natural & Gentle"
+               class="img-fluid"
+               style="width: 100%; height: auto; border-radius: 12px;">
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6 px-0">
+        <div class="d-flex justify-content-center align-items-center">
+          <img src="{{ url_for('static', filename='images/ChatGPT Image Nov 3, 2025, 11_51_36 PM.png') }}" 
+               alt="Expert Consultation"
+               class="img-fluid"
+               style="width: 100%; height: auto; border-radius: 12px;">
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6 px-0">
+        <div class="d-flex justify-content-center align-items-center">
+          <img src="{{ url_for('static', filename='images/ChatGPT Image Nov 3, 2025, 11_53_24 PM.png') }}" 
+               alt="Fast & Secure Delivery"
+               class="img-fluid"
+               style="width: 100%; height: auto; border-radius: 12px;">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 🌱 Featured CTA Section -->
+<section class="text-center my-5 py-5 ready-to-grow-section">
+  <div class="container">
+    <h3 class="fw-bold mb-3 text-dark">Ready to Glow with Confidence?</h3>
+    <p class="text-muted mb-4">
+      Join thousands of happy customers transforming their skincare routines with GlowCare.
+    </p>
+
+    {% if not session.user_id and not session.derm_id %}
+      <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg px-5 shadow-sm">
+        Get Started
+      </a>
+    {% endif %}
+  </div>
+</section>
+
+<!-- 🌸 Footer CTA Banner -->
+<section class="text-center py-5 mb-4 self-care-section">
+  <div class="container">
+    <h2 class="fw-bold mb-3">Self-care starts with skincare 💖</h2>
+    <p class="mb-4 lead">
+      Shop premium skincare essentials and consult dermatologists for radiant results.
+    </p>
+
+    {% if session.user_id %}
+      <a href="{{ url_for('browse') }}" class="btn btn-primary fw-semibold px-5 py-2 shadow-sm">
+        Explore Products
+      </a>
+    {% elif session.derm_id %}
+      <a href="{{ url_for('derm_dashboard') }}" class="btn btn-primary fw-semibold px-5 py-2 shadow-sm">
+        Go to Dashboard
+      </a>
+    {% else %}
+      <a href="{{ url_for('login') }}" class="btn btn-primary fw-semibold px-5 py-2 shadow-sm">
+        Login to Continue
+      </a>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

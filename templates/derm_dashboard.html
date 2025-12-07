@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container py-4">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-success mb-0">👩‍⚕️ Welcome, Dr. {{ derm_name }}</h2>
+    <div>
+      <a href="{{ url_for('derm_slots') }}" class="btn btn-outline-success me-2">
+        🕒 Edit Availability
+      </a>
+      <a href="{{ url_for('derm_logout') }}" class="btn btn-danger">Logout</a>
+    </div>
+  </div>
+
+  <!-- Top summary cards -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 text-center p-4">
+        <h6 class="fw-semibold text-secondary mb-1">Today's Appointments</h6>
+        <h1 class="text-success fw-bold mb-2">{{ today_appointments }}</h1>
+        <p class="text-muted small mb-0">Stay prepared for today’s sessions.</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 text-center p-4">
+        <h6 class="fw-semibold text-secondary mb-1">Total Patients Seen</h6>
+        <h1 class="fw-bold mb-2">{{ total_patients }}</h1>
+        <p class="text-muted small mb-0">Based on all your past consultations.</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 text-center p-4">
+        <h6 class="fw-semibold text-secondary mb-1">Upcoming Consultations</h6>
+        <h1 class="fw-bold mb-2">{{ upcoming_count }}</h1>
+        <p class="text-muted small mb-0">
+          <a href="{{ url_for('derm_appointments') }}" class="text-success text-decoration-none">
+            View full schedule →
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content: Today's schedule + Analytics + Weekly Overview -->
+  <div class="row g-4">
+
+    <!-- Today's Schedule -->
+    <div class="col-lg-7">
+      <div class="card shadow-sm border-0" style="max-height: 380px; overflow-y: auto;">
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+          <h5 class="fw-bold text-success mb-0">Today's Schedule</h5>
+          <span class="text-muted small">
+            {{ todays_schedule|length }} session{{ todays_schedule|length != 1 and 's' or '' }} today
+          </span>
+        </div>
+        <div class="card-body p-0">
+          {% if todays_schedule %}
+          <ul class="list-group list-group-flush">
+            {% for c in todays_schedule %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-semibold">
+                  {{ c.consult_date.strftime('%I:%M %p') }} – {{ c.cust_name }}
+                </div>
+                <div class="text-muted small">
+                  {{ c.consult_date.strftime('%d %b %Y') }}
+                </div>
+              </div>
+              <div class="text-end">
+                {% if c.can_join %}
+                  <span class="badge bg-success mb-1">Live window</span><br>
+                  <a href="{{ url_for('live_consultation', consult_id=c.consult_id) }}"
+                     class="btn btn-outline-success btn-sm">
+                    Join
+                  </a>
+                {% elif c.is_future %}
+                  <span class="badge bg-secondary">Upcoming</span>
+                {% else %}
+                  <span class="badge bg-danger">Expired</span>
+                {% endif %}
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <div class="p-4 text-center text-muted">
+            No consultations scheduled for today.
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: Analytics + Weekly Overview -->
+    <div class="col-lg-5 d-flex flex-column gap-4">
+
+      <!-- Patient Analytics -->
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-0">
+          <h5 class="fw-bold text-success mb-0">Patient Analytics</h5>
+          <small class="text-muted">Last 7 days</small>
+        </div>
+        <div class="card-body">
+          <canvas id="patientsChart" height="180"></canvas>
+        </div>
+      </div>
+
+      <!-- Weekly Overview (replacing the old Quick Tasks) -->
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+          <h5 class="fw-bold text-success mb-0">This Week at a Glance</h5>
+          <span class="text-muted small">Rolling 7 days</span>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled mb-3">
+            <li class="mb-2">
+              <span class="fw-semibold">Total consultations:</span>
+              <span class="text-muted">{{ week_total_consults }}</span>
+            </li>
+            <li class="mb-2">
+              <span class="fw-semibold">Average per day:</span>
+              <span class="text-muted">{{ avg_consults_per_day }}</span>
+            </li>
+            <li class="mb-2">
+              <span class="fw-semibold">Busiest day:</span>
+              <span class="text-muted">{{ busiest_day_label }}</span>
+            </li>
+          </ul>
+          <a href="{{ url_for('derm_appointments') }}" class="btn btn-outline-success w-100">
+            Open Appointments
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Simple Chart.js script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('patientsChart').getContext('2d');
+  const labels = {{ analytics_labels|tojson }};
+  const patients = {{ analytics_patients|tojson }};
+  const consults = {{ analytics_consults|tojson }};
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Patients Seen',
+          data: patients,
+          tension: 0.3,
+          fill: false,
+          borderWidth: 2
+        },
+        {
+          label: 'Consultations',
+          data: consults,
+          tension: 0.3,
+          fill: false,
+          borderWidth: 2
+        }
+      ]
+    },
+    options: {
+      plugins: {
+        legend: { display: true }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+      }
+    }
+  });
+</script>
+
+{% endblock %}

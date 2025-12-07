@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Consultations – GlowCare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- If you’re already loading Bootstrap / your CSS elsewhere,
+         you can remove this CDN and keep only your own style.css. -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        /* Simple extra styling for the filter buttons */
+        .consult-filter-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            border: 1px solid #2f6f5e;
+            background: #ffffff;
+            color: #2f6f5e;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+        }
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: #2f6f5e;
+            color: #ffffff;
+        }
+
+        .status-pill {
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-upcoming {
+            background: #e9f7f0;
+            color: #1f7a5c;
+        }
+        .status-live {
+            background: #e7f3ff;
+            color: #0b63d1;
+        }
+        .status-expired {
+            background: #fde7e7;
+            color: #c0392b;
+        }
+
+        .btn-join {
+            background: #1f7a5c;
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            padding: 5px 14px;
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+        .btn-join:hover {
+            background: #175b44;
+        }
+        .btn-disabled {
+            background: #e0e0e0;
+            color: #777;
+            border-radius: 999px;
+            padding: 5px 14px;
+            font-size: 0.82rem;
+            border: none;
+            cursor: not-allowed;
+        }
+        .btn-summary {
+            background: transparent;
+            color: #1f7a5c;
+            border-radius: 999px;
+            padding: 5px 14px;
+            font-size: 0.82rem;
+            border: 1px solid #1f7a5c;
+            cursor: pointer;
+        }
+        .btn-summary:hover {
+            background: #1f7a5c;
+            color: #fff;
+        }
+
+        .consult-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .consult-table th,
+        .consult-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #e9f2ee;
+            font-size: 0.9rem;
+        }
+        .consult-table thead {
+            background: #e3f1ea;
+        }
+
+        .page-container {
+            max-width: 1100px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px 28px 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+        }
+
+        .page-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .page-title-row h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #26413c;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn-top {
+            border: 1px solid #e57373;
+            color: #c62828;
+            background: #fff;
+            border-radius: 999px;
+            padding: 5px 14px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .logout-btn-top:hover {
+            background: #ffebee;
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                margin: 20px auto;
+                padding: 18px;
+            }
+            .consult-table th,
+            .consult-table td {
+                padding: 8px 8px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body style="background:#f7faf9; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+
+    <!-- Top nav – keep whatever you’re already using.
+         This is a simple version to match your existing pages. -->
+    <header style="background:#23493c; color:#fff; padding:10px 40px; display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-weight:700; font-size:1.1rem;">GlowCare</span>
+            <nav style="display:flex; gap:18px; font-size:0.9rem;">
+                <a href="{{ url_for('home') }}" style="color:#e0f2f1; text-decoration:none;">Home</a>
+                <a href="{{ url_for('derm_dashboard') }}" style="color:#e0f2f1; text-decoration:none;">Dashboard</a>
+                <a href="{{ url_for('derm_appointments') }}" style="color:#ffffff; text-decoration:none; font-weight:600;">Appointments</a>
+                <a href="{{ url_for('derm_slots') }}" style="color:#e0f2f1; text-decoration:none;">Availability</a>
+            </nav>
+        </div>
+        <div style="display:flex; align-items:center; gap:14px; font-size:0.85rem;">
+            <span>Hi, {{ session.get('derm_name', 'Doctor') }} 🧑‍⚕️</span>
+            <form action="{{ url_for('derm_logout') }}" method="get" style="margin:0;">
+                <button type="submit" class="logout-btn-top">Logout</button>
+            </form>
+        </div>
+    </header>
+
+    <main class="page-container">
+        <div class="page-title-row">
+            <h2>📋 My Consultations</h2>
+        </div>
+
+        <!-- Filter buttons -->
+        <div class="consult-filter-bar">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="upcoming">Upcoming</button>
+            <button class="filter-btn" data-filter="live">Live now</button>
+            <button class="filter-btn" data-filter="past">Past</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="consult-table">
+                <thead>
+                    <tr>
+                        <th style="width:25%;">Patient</th>
+                        <th style="width:30%;">Date</th>
+                        <th style="width:20%;">Status</th>
+                        <th style="width:25%;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% if consults %}
+                    {% for c in consults %}
+                        {# determine row type for filtering #}
+                        {% set row_type = 'past' if c.is_completed else 'upcoming' %}
+                        <tr class="consult-row"
+                            data-type="{{ row_type }}"
+                            data-live="{{ '1' if c.can_join else '0' }}">
+                            <td>{{ c.cust_name }}</td>
+                            <td>
+                                {% if c.consult_date %}
+                                    {{ c.consult_date.strftime('%d-%m-%Y %I:%M %p') }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if c.can_join %}
+                                    <span class="status-pill status-live">Live Now</span>
+                                {% elif not c.is_completed %}
+                                    <span class="status-pill status-upcoming">Upcoming</span>
+                                {% else %}
+                                    <span class="status-pill status-expired">Expired</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if c.can_join %}
+                                    <a href="{{ url_for('live_consultation', consult_id=c.consult_id) }}">
+                                        <button type="button" class="btn-join">Join Session</button>
+                                    </a>
+                                {% elif not c.is_completed %}
+                                    <button type="button" class="btn-disabled" disabled>Not Available</button>
+                                {% else %}
+                                    <!-- If you have a summary page, replace '#' with its URL -->
+                                    <button type="button" class="btn-summary">View Summary</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding:20px;">
+                            No consultations found.
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Simple filtering JS -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const buttons = document.querySelectorAll('.filter-btn');
+        const rows = document.querySelectorAll('.consult-row');
+
+        function applyFilter(filter) {
+            rows.forEach(row => {
+                const type = row.dataset.type;          // "upcoming" or "past"
+                const isLive = row.dataset.live === '1';
+                let show = false;
+
+                if (filter === 'all') {
+                    show = true;
+                } else if (filter === 'upcoming') {
+                    show = (type === 'upcoming' && !isLive);
+                } else if (filter === 'live') {
+                    show = isLive;
+                } else if (filter === 'past') {
+                    show = (type === 'past');
+                }
+
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                buttons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                applyFilter(btn.dataset.filter);
+            });
+        });
+
+        // default view
+        applyFilter('all');
+    });
+    </script>
+</body>
+</html>
